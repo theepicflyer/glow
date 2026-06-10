@@ -191,23 +191,36 @@ func validateOptions(cmd *cobra.Command) error {
 		style = "notty"
 	}
 
-	// Detect terminal width
-	if !cmd.Flags().Changed("width") { //nolint:nestif
-		if isTerminal && width == 0 {
-			w, _, err := term.GetSize(int(os.Stdout.Fd()))
-			if err == nil {
-				width = uint(w) //nolint:gosec
-			}
-
-			if width > 120 {
-				width = 120
+	// Resolve the word-wrap width. A configured width of 0 means "adaptive":
+	// follow the full terminal width when rendering to a terminal.
+	if !cmd.Flags().Changed("width") {
+		var terminalWidth uint
+		if isTerminal {
+			if w, _, err := term.GetSize(int(os.Stdout.Fd())); err == nil {
+				terminalWidth = uint(w) //nolint:gosec
 			}
 		}
-		if width == 0 {
-			width = 80
-		}
+		width = resolveWidth(width, isTerminal, terminalWidth)
 	}
 	return nil
+}
+
+// defaultWidth is the word-wrap width used when adaptive sizing can't determine
+// the terminal width (e.g. output is not a terminal).
+const defaultWidth uint = 80
+
+// resolveWidth determines the word-wrap width when --width was not explicitly
+// set. A configured width of 0 means "adaptive": follow the terminal width when
+// rendering to a terminal, otherwise fall back to defaultWidth. The adaptive
+// width is uncapped and tracks the full terminal width.
+func resolveWidth(configured uint, isTerminal bool, terminalWidth uint) uint {
+	if configured != 0 {
+		return configured
+	}
+	if isTerminal && terminalWidth != 0 {
+		return terminalWidth
+	}
+	return defaultWidth
 }
 
 func stdinIsPipe() (bool, error) {
