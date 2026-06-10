@@ -19,8 +19,8 @@ style: "auto"
 mouse: false
 # use pager to display markdown
 pager: false
-# word-wrap at width
-width: 80
+# word-wrap at width (0 adapts to the terminal width)
+width: 0
 # show all files, including hidden and ignored.
 all: false
 `

@@ -152,11 +152,15 @@ glow https://host.tld/file.md
 
 ### Word Wrapping
 
-The `-w` flag lets you set a maximum width at which the output will be wrapped:
+By default `glow` adapts the word-wrap width to your terminal, using the full
+terminal width. The `-w` flag lets you set a fixed maximum width instead:
 
 ```bash
 glow -w 60
 ```
+
+Set the width to `0` in your config file to keep the adaptive behavior. Passing
+`-w 0` on the command line disables word wrapping entirely.
 
 ### Paging
 
@@ -205,8 +209,8 @@ style: "light"
 mouse: true
 # use pager to display markdown
 pager: true
-# at which column should we word wrap?
-width: 80
+# at which column should we word wrap? (0 adapts to the terminal width)
+width: 0
 # show all files, including hidden and ignored.
 all: false
 # show line numbers (TUI-mode only)
